@@ -6,7 +6,7 @@ import helmet = require("helmet");
 
 import routes from "../routes/index.route";
 
-const app = express.call(this);
+const app = express();
 
 app.use(json());
 app.use(urlencoded({ extended: true }));
