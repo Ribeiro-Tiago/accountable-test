@@ -5,18 +5,11 @@ export const items = [
 	"coal"
 ];
 
-export const currencies = {
-	coal: "kg",
-	cheese: "kg",
-	book: "quantity",
-	bike: "quantity"
-};
-
 export const maxPerPerson = {
 	coal: .1,
 	bike: 2,
-	buy_bike_in_row: 2,
-	sell_book_in_row: 3,
+	buy_bike_in_row: 1,
+	sell_book_in_row: 2,
 };
 
 export const buy = {
