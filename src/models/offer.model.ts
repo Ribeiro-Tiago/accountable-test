@@ -1,5 +1,7 @@
 import { Schema, model } from "mongoose";
 
+import { ItemType, ItemPresentation } from "./item.model";
+
 export const offerSchema = new Schema({
 	id: {
 		type: String,
@@ -22,10 +24,6 @@ export const offerSchema = new Schema({
 		required: true
 	}
 });
-
-export type ItemType = "book" | "bike" | "coal" | "cheese";
-
-export type ItemPresentation = "kg" | "numeric";
 
 export interface BaseOffer {
 	id: string;

@@ -1,5 +1,5 @@
 import { Schema, model } from "mongoose";
-import { ItemType } from "./offer.model";
+import { ItemType } from "./item.model";
 
 export const globalMarketSchema = new Schema({
 	item: {

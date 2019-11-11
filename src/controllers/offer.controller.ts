@@ -1,9 +1,9 @@
 import { v4 } from "uuid";
 import { Document } from "mongoose";
 
-import Offer, { IOffer, BaseOffer, ItemType } from "../models/offer.model";
+import Offer, { IOffer, BaseOffer } from "../models/offer.model";
 import Trader, { ITrader } from "../models/trader.model";
-import { formatCurrency, formatKg } from "../utils/formatter/formatter";
+import { ItemType } from "../models/item.model";
 import { items, maxPerPerson } from "../config/rules";
 import GlobalMarket, { IGlobalMarket } from "../models/globalMarket.model";
 
