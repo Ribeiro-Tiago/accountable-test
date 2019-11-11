@@ -6,12 +6,12 @@ import Trader, { ITrader } from "../models/trader.model";
 import { formatCurrency, formatKg } from "../utils/formatter/formatter";
 import { items } from "../config/rules";
 
-const PAGE_SIZE = 30;
+const PAGE_SIZE = 12;
 
 export const listOffers = async (page: number = 1): Promise<IOffer[]> => {
 	const skip = page > 1
 		? (page - 1) * PAGE_SIZE + 1
-		: 1;
+		: 0;
 
 	const result = await Offer
 		.find({}, { _id: 0, __v: 0 }, { skip })

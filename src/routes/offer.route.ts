@@ -5,7 +5,7 @@ import { executer } from "../utils/executer/executer";
 
 const router = Router();
 
-router.get("/", async (_req: Request, res: Response) => executer(res, controller.listOffers));
+router.get("/", async (req: Request, res: Response) => executer(res, controller.listOffers, req.query.page));
 
 router.get("/:id", async (req: Request, res: Response) => executer(res, controller.offerDetails, req.params.id));
 
