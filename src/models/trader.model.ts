@@ -6,15 +6,19 @@ const traderSchema = new Schema({
 		type: String,
 		required: true
 	},
-	bikes: {
+	bike: {
 		type: Number,
 		default: 0
 	},
-	books: {
+	book: {
 		type: Number,
 		default: 0
 	},
 	coal: {
+		type: Number,
+		default: 0
+	},
+	cheese: {
 		type: Number,
 		default: 0
 	},
