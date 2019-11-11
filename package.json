@@ -7,7 +7,7 @@
 		"start": "nodemon --watch 'src/**/*' -e ts,tsx --exec ts-node ./src/server.ts",
 		"start:test": "npm start && jest --watchAll",
 		"test": "jest --watchAll",
-		"test:once": "jest",
+		"test:once": "jest --forceExit",
 		"docker": "docker-compose up",
 		"docker:test": "npm run docker:api-bash && npm test",
 		"docker:build": "docker-compose up --build",
