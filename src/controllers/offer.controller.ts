@@ -6,15 +6,17 @@ import Trader, { ITrader } from "../models/trader.model";
 import { ItemType } from "../models/item.model";
 import { items, maxPerPerson } from "../config/rules";
 import GlobalMarket, { IGlobalMarket } from "../models/globalMarket.model";
+import { formatCurrency, formatKg } from "../utils/formatter/formatter";
+import { calculateBuyTax } from "../utils/tax/tax";
+import { updateGovtBalance } from "./government.controller";
 
 const PAGE_SIZE = 12;
 
-const updateBuyer = async (id: string, item: ItemType, price: number, quantity: number): Promise<void> => {
-	const buyer = (await Trader.findOne({ id })) as ITrader;
+const updateBuyer = async (buyer: ITrader, item: ItemType, price: number, quantity: number, tax: number)
+	: Promise<void> => {
+	await checkBuyability(buyer, price, item, quantity, tax);
 
-	await checkBuyability(buyer, price, item, quantity);
-
-	buyer.cg -= price;
+	buyer.cg -= (price + tax);
 	buyer[item] += quantity;
 	buyer.lastPurchase = item;
 
@@ -25,7 +27,8 @@ const updateBuyer = async (id: string, item: ItemType, price: number, quantity: 
  * Checks if the buyer can buy this offer, checking if he exists,
  * his balance and if he's eligible according to the rules
  */
-const checkBuyability = async (buyer: ITrader, price: number, item: ItemType, quantity: number): Promise<void> => {
+const checkBuyability = async (buyer: ITrader, price: number, item: ItemType, quantity: number, tax: number)
+	: Promise<void> => {
 	if (!buyer) {
 		throw {
 			status: 400,
@@ -33,7 +36,7 @@ const checkBuyability = async (buyer: ITrader, price: number, item: ItemType, qu
 		};
 	}
 
-	if (buyer.cg < price) {
+	if (buyer.cg < price || buyer.cg < tax) {
 		throw {
 			status: 400,
 			message: "You don't have enough funds to make this purchase"
@@ -155,7 +158,10 @@ export const acceptOffer = async (offerId: string, buyerId: string) => {
 		};
 	}
 
-	await updateBuyer(buyerId, item, price, quantity);
+	const buyer = (await Trader.findOne({ id: offerId })) as ITrader;
+	const tax = calculateBuyTax(item, price, buyer.coal);
+	await updateBuyer(buyer, item, price, quantity, tax);
 	await updateSeller(owner, item, price, quantity);
 	await Offer.findOneAndRemove({ id: offerId });
+	await updateGovtBalance(tax);
 };
