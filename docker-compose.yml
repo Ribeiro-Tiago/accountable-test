@@ -1,0 +1,34 @@
+version: "3.7"
+
+services:
+  db:
+    image: mongo
+    restart: always
+    container_name: db
+    ports:
+      - 27017:27017
+    volumes:
+      - mongo:/data/db
+
+  api:
+    image: api
+    build:
+      context: .
+      dockerfile: api.dockerfile
+    restart: always
+    ports: 
+      - 3000:3000
+    depends_on: 
+      - db
+    container_name: api
+    environment:
+      DB_HOST: db
+      DB_PORT: 27017
+      NODE_ENV: development
+      SERVER_PORT: 3000
+      SERVER_HOST: localhost
+    volumes:
+      - ./src:/app/src
+      
+volumes:
+  mongo: null
