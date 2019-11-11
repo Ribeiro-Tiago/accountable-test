@@ -23,13 +23,13 @@ export const offerSchema = new Schema({
 	}
 });
 
-export type OfferItem = "book" | "bike" | "coal" | "cheese";
+export type ItemType = "book" | "bike" | "coal" | "cheese";
 
 export type ItemPresentation = "kg" | "numeric";
 
 export interface BaseOffer {
 	id: string;
-	item: OfferItem;
+	item: ItemType;
 	quantity: number;
 	price: number;
 	owner: string;

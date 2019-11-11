@@ -37,8 +37,9 @@ const traderSchema = new Schema({
 export interface ITrader extends Document {
 	_id: string;
 	id: string;
-	bikes: number;
-	books: number;
+	bike: number;
+	book: number;
+	cheese: number;
 	coal: number;
 	cg: number;
 	lastPurchase: string;

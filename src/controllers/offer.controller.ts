@@ -1,16 +1,31 @@
 import { v4 } from "uuid";
 import { Document } from "mongoose";
 
-import Offer, { IOffer, BaseOffer, OfferItem } from "../models/offer.model";
+import Offer, { IOffer, BaseOffer, ItemType } from "../models/offer.model";
 import Trader, { ITrader } from "../models/trader.model";
 import { formatCurrency, formatKg } from "../utils/formatter/formatter";
-import { items } from "../config/rules";
+import { items, maxPerPerson } from "../config/rules";
+import GlobalMarket, { IGlobalMarket } from "../models/globalMarket.model";
 
 const PAGE_SIZE = 12;
 
-const updateBuyer = async (id: string, item: OfferItem, price: number, quantity: number): Promise<void> => {
+const updateBuyer = async (id: string, item: ItemType, price: number, quantity: number): Promise<void> => {
 	const buyer = (await Trader.findOne({ id })) as ITrader;
 
+	await checkBuyability(buyer, price, item, quantity);
+
+	buyer.cg -= price;
+	buyer[item] += quantity;
+	buyer.lastPurchase = item;
+
+	buyer.save();
+};
+
+/**
+ * Checks if the buyer can buy this offer, checking if he exists,
+ * his balance and if he's eligible according to the rules
+ */
+const checkBuyability = async (buyer: ITrader, price: number, item: ItemType, quantity: number): Promise<void> => {
 	if (!buyer) {
 		throw {
 			status: 400,
@@ -25,13 +40,36 @@ const updateBuyer = async (id: string, item: OfferItem, price: number, quantity:
 		};
 	}
 
-	buyer.cg -= price;
-	buyer[item] += quantity;
+	if (item === "bike") {
+		if (buyer.bike === maxPerPerson.bike) {
+			throw {
+				status: 400,
+				message: "You can only have 2 bikes"
+			};
+		}
 
-	buyer.save();
+		if (buyer.lastPurchase === "bike" && buyer.samePurcahseInRow === maxPerPerson.buy_bike_in_row) {
+			throw {
+				status: 400,
+				message: "You can't buy 2 bikes in a row"
+			};
+		}
+	}
+
+	if (item === "coal") {
+		const global = (await GlobalMarket.findOne({ item: "coal" })) as IGlobalMarket & Document;
+		const maxCoalPerPerson = global.quantity * maxPerPerson.coal;
+
+		if (buyer.coal + quantity > maxCoalPerPerson) {
+			throw {
+				status: 400,
+				message: `You cannot have more than 10% of the global coal market ${formatKg(maxCoalPerPerson)}`
+			};
+		}
+	}
 };
 
-const updateSeller = async (id: string, item: OfferItem, price: number, quantity: number): Promise<void> => {
+const updateSeller = async (id: string, item: ItemType, price: number, quantity: number): Promise<void> => {
 	await Trader.findOneAndUpdate({ id }, {
 		$inc: {
 			cg: price,
