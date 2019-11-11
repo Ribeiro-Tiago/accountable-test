@@ -5,17 +5,17 @@ export const calculateBuyTax = (item: ItemType, price: number, buyerCoal: number
 	const tax = buyTax[item];
 	let value = 0;
 
-	if (tax) {
+	if (tax || tax === 0) {
 		value = price * tax;
 
 		if (item === "book") {
-			let coalOwnerTax = ownerTaxes.book_per_coal * Math.floor(buyerCoal) / 10;
+			let coalOwnerTax = ownerTaxes.book_per_coal * Math.floor(buyerCoal);
 
 			if (coalOwnerTax > ownerTaxes.book_per_coal_limit) {
 				coalOwnerTax = .5;
 			}
 
-			value += price * coalOwnerTax;
+			value += Number((price * coalOwnerTax).toFixed(2));
 		}
 	}
 
@@ -28,13 +28,13 @@ export const calculateSellTax = (item: ItemType, price: number, buyerBike: numbe
 
 	if (tax) {
 		if (item === "coal") {
-			tax -= ownerTaxes.coal_per_bike * buyerBike / 10;
+			tax -= ownerTaxes.coal_per_bike * buyerBike;
 		}
 
 		value = (tax > 0)
 			? price * tax
-			: price;
+			: 0;
 	}
 
-	return value;
+	return Number(value.toFixed(2));
 };
