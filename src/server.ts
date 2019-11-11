@@ -5,7 +5,7 @@ import "./config/mongoose";
 app.listen(
 	server.port,
 	server.host,
-	() => console.info(`server started on port ${server.port} (${env})`)
+	() => console.info(`Server started ${server.host}:${server.port} (${env})`)
 );
 
 export default app;

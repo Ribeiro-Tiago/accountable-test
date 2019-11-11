@@ -26,7 +26,7 @@ services:
       DB_PORT: 27017
       NODE_ENV: development
       SERVER_PORT: 3000
-      SERVER_HOST: localhost
+      SERVER_HOST: 0.0.0.0
     volumes:
       - ./src:/app/src
       
