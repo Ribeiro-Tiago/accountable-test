@@ -6,7 +6,7 @@ import helmet = require("helmet");
 
 import routes from "../routes/index.route";
 
-const app = express.call(this);
+const app = express();
 
 app.use(json());
 app.use(urlencoded({ extended: true }));
@@ -18,6 +18,6 @@ app.use(helmet());
 app.use(cors());
 
 // API router
-app.use("/api/", routes);
+app.use(routes);
 
 export default app;
