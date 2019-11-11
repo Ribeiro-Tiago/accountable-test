@@ -7,7 +7,7 @@ import { ItemType } from "../models/item.model";
 import { items, maxPerPerson } from "../config/rules";
 import GlobalMarket, { IGlobalMarket } from "../models/globalMarket.model";
 import { formatCurrency, formatKg } from "../utils/formatter/formatter";
-import { calculateBuyTax } from "../utils/tax/tax";
+import { calculateBuyTax, calculateSellTax } from "../utils/tax/tax";
 import { updateGovtBalance } from "./government.controller";
 
 const PAGE_SIZE = 12;
@@ -122,11 +122,28 @@ export const offerDetails = async (id: string): Promise<IOffer> => {
 	};
 };
 
-export const createOffer = async ({ item, owner, price, quantity }: BaseOffer) => {
+export const createOffer = async ({ item, owner, price, quantity }: BaseOffer): Promise<IOffer> => {
 	if (!item || !owner || !price || !quantity || !items.includes(item)) {
 		throw {
 			status: 400,
 			message: "Invalid offer"
+		};
+	}
+
+	const seller = (await Trader.findOne({ id: owner })) as ITrader;
+
+	if (seller[item] < quantity) {
+		throw {
+			status: 400,
+			message: `You only have ${seller[item]} of ${item}`
+		};
+	}
+
+	const tax = calculateSellTax(item, price, seller.bike);
+	if (seller.cg < tax) {
+		throw {
+			status: 400,
+			message: `You cannot afford the ${formatCurrency(tax)} sell tax.`
 		};
 	}
 

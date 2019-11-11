@@ -22,7 +22,7 @@ export const calculateBuyTax = (item: ItemType, price: number, buyerCoal: number
 	return value;
 };
 
-export const calculateSellText = (item: ItemType, price: number, buyerBike: number): number => {
+export const calculateSellTax = (item: ItemType, price: number, buyerBike: number): number => {
 	let tax = sellTax[item];
 	let value = 0;
 
