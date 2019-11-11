@@ -15,7 +15,7 @@ export const listTraders = async (page: number = 1): Promise<ITrader[]> => {
 		: 0;
 
 	const result = await Trader
-		.find({}, { _id: 0, __v: 0 }, { skip })
+		.find({ id: { $ne: "government" } }, { _id: 0, __v: 0 }, { skip })
 		.limit(page * PAGE_SIZE);
 
 	return result.map((t: any) => ({
