@@ -1,5 +1,4 @@
 import { Schema, model, Document } from "mongoose";
-import { offerSchema } from "./offer.model";
 
 const traderSchema = new Schema({
 	id: {
@@ -32,9 +31,6 @@ const traderSchema = new Schema({
 	samePurcahseInRow: {
 		type: Number,
 		default: 0
-	},
-	offers: {
-		type: [offerSchema]
 	}
 });
 

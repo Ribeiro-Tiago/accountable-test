@@ -1,12 +1,46 @@
 import { v4 } from "uuid";
 import { Document } from "mongoose";
 
-import Offer, { IOffer, BaseOffer } from "../models/offer.model";
+import Offer, { IOffer, BaseOffer, OfferItem } from "../models/offer.model";
 import Trader, { ITrader } from "../models/trader.model";
 import { formatCurrency, formatKg } from "../utils/formatter/formatter";
 import { items } from "../config/rules";
 
 const PAGE_SIZE = 12;
+
+const updateBuyer = async (id: string, item: OfferItem, price: number, quantity: number): Promise<void> => {
+	const buyer = (await Trader.findOne({ id })) as ITrader;
+
+	if (!buyer) {
+		throw {
+			status: 400,
+			message: "Missing buyer"
+		};
+	}
+
+	if (buyer.cg < price) {
+		throw {
+			status: 400,
+			message: "You don't have enough funds to make this purchase"
+		};
+	}
+
+	buyer.cg -= price;
+	buyer[item] += quantity;
+
+	buyer.save();
+};
+
+const updateSeller = async (id: string, item: OfferItem, price: number, quantity: number): Promise<void> => {
+	await Trader.findOneAndUpdate({ id }, {
+		$inc: {
+			cg: price,
+		},
+		$dec: {
+			[item]: quantity
+		}
+	});
+};
 
 export const listOffers = async (page: number = 1): Promise<IOffer[]> => {
 	const skip = page > 1
@@ -67,40 +101,23 @@ export const createOffer = async ({ item, owner, price, quantity }: BaseOffer) =
 /**
  * TODO: look into making this a transaction
  */
-export const acceptOffer = async (details: BaseOffer, customer: string) => {
+export const acceptOffer = async (offerId: string, buyerId: string) => {
+	const details = (await Offer.findOne({ id: offerId })) as IOffer & Document;
+
+	if (!details) {
+		throw 404;
+	}
+
 	const { item, owner, price, quantity } = details;
 
-	if (customer === owner) {
+	if (buyerId === owner) {
 		throw {
 			status: 400,
 			message: "You can't buy your own offers"
 		};
 	}
 
-	const buyer = (await Trader.findOne({ id: customer })) as ITrader;
-
-	if (!buyer) {
-		throw 404;
-	}
-
-	if (buyer.cg < price) {
-		throw {
-			status: 400,
-			message: "You don't have enough funds to make this purchase"
-		};
-	}
-
-	buyer.cg -= price;
-	buyer[item] += quantity;
-
-	buyer.save();
-
-	await Trader.findOneAndUpdate({ id: owner }, {
-		$inc: {
-			cg: price,
-		},
-		$dec: {
-			[item]: quantity
-		}
-	});
+	await updateBuyer(buyerId, item, price, quantity);
+	await updateSeller(owner, item, price, quantity);
+	await Offer.findOneAndRemove({ id: offerId });
 };

@@ -1,9 +1,9 @@
 import { Response } from "express";
 
 // tslint:disable-next-line: ban-types
-export const executer = async (res: Response, func: Function, params?: string) => {
+export const executer = async (res: Response, func: Function, ...params: string[]) => {
 	try {
-		res.json(await func(params));
+		res.json(await func(...params));
 	} catch (err) {
 		if (err.status && err.message) {
 			res.status(err.status);
@@ -12,6 +12,7 @@ export const executer = async (res: Response, func: Function, params?: string) =
 			res.status(404);
 			res.json("Resource not found");
 		} else {
+			console.log(err);
 			res.status(500);
 			res.json("Could not proccess request");
 		}
